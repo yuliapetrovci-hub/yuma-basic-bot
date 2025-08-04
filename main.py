@@ -1,23 +1,22 @@
-import telebot
-import os
-from flask import Flask, request
+import flask
+import telegram
 
-TOKEN = os.getenv("BOT_TOKEN")
-bot = telebot.TeleBot(TOKEN)
-app = Flask(__name__)
+TOKEN = "8009723450:AAGQzCEH36BMYFGeYtrhGFz5F3vav2Sa8n0"
+bot = telegram.Bot(token=TOKEN)
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.send_message(message.chat.id, "Привіт! Я бот Юма. Як ти себе почуваєш сьогодні?")
+app = flask.Flask(__name__)
 
-@app.route(f"/{TOKEN}", methods=['POST'])
+@app.route('/', methods=['POST'])
 def webhook():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
+    update = telegram.Update.de_json(flask.request.get_json(force=True), bot)
+    chat_id = update.message.chat.id
+    text = update.message.text
+    bot.send_message(chat_id=chat_id, text="Привіт! Це тест від Юми ☀️")
+    return 'ok'
 
-@app.route("/")
+@app.route('/', methods=['GET'])
 def index():
-    return "Бот працює!"
+    return 'Бот працює!'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run()
